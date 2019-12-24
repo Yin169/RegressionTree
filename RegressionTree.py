@@ -47,10 +47,9 @@ class RTree(object):
         x = [X[i] for i in idx]
         y = [Y[i] for i in idx]
         set = list(map(lambda x: self.best_split(x, y), list(map(list, zip(*x)))))
-        if all(set) == None:
+        if not all(set):
             return None
         set = [[sys.maxsize for i in range(3)] if x is None else x for x in set]
-        print(set)
         mse, avg, split = min(set, key=lambda d:d[0])
         feature = [m[0] for m in set].index(mse)
         X = list(map(list, zip(*X)))
@@ -58,7 +57,7 @@ class RTree(object):
                [i for i, x in enumerate(X[feature]) if x >= split]]
         return mse, feature, avg, split, idx
 
-    def fit(self, X, y, max_depth=2, min_sample=1):
+    def fit(self, X, y, max_depth=10, min_sample=1):
         que = [[0,self.root,list(range(len(y)))]]
         while (len(que)>0):
             depth, node, idx = que.pop(0)
@@ -92,8 +91,8 @@ def gen_data(x1, x2):
     return y
 
 def load_data():
-    x1_train = np.linspace(0, 50, 100)
-    x2_train = np.linspace(-10, 10, 100)
+    x1_train = np.linspace(0, 50, 1000)
+    x2_train = np.linspace(-10, 10, 1000)
     data_train = [[x1, x2, gen_data(x1, x2) + np.random.random(1)[0] - 0.5] for x1, x2 in zip(x1_train, x2_train)]
     x1_test = np.linspace(0, 50, 100) + np.random.random(100) * 0.5
     x2_test = np.linspace(-10, 10, 100) + 0.02 * np.random.random(100)
