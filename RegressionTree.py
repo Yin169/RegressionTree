@@ -43,20 +43,22 @@ class RTree(object):
         mse, avg, split = min(list(map(lambda split: self.mse(x,y,split), uniq)), key=lambda d:d[0])
         return mse, avg, split
 
-    def best_feat(self, X, y):
-        set = list(map(lambda x: self.best_split(x, y), map(list, zip(*X))))
+    def best_feat(self, X, Y, idx):
+        x = [X[i] for i in idx]
+        y = [Y[i] for i in idx]
+        set = list(map(lambda x: self.best_split(x, y), list(map(list, zip(*x)))))
         if all(set) == None:
             return None
         set = [[sys.maxsize for i in range(3)] if x is None else x for x in set]
+        print(set)
         mse, avg, split = min(set, key=lambda d:d[0])
         feature = [m[0] for m in set].index(mse)
-
-        Xt = list(map(list, zip(*X)))
-        idx = [[i for i, x in enumerate(Xt[feature]) if x < split],
-               [i for i, x in enumerate(Xt[feature]) if x >= split]]
+        X = list(map(list, zip(*X)))
+        idx = [[i for i, x in enumerate(X[feature]) if x < split],
+               [i for i, x in enumerate(X[feature]) if x >= split]]
         return mse, feature, avg, split, idx
 
-    def fit(self, X, y, max_depth=2, min_sample=2):
+    def fit(self, X, y, max_depth=2, min_sample=1):
         que = [[0,self.root,list(range(len(y)))]]
         while (len(que)>0):
             depth, node, idx = que.pop(0)
@@ -64,7 +66,7 @@ class RTree(object):
                 break;
             if len(idx)<min_sample:
                 continue
-            feature_set = self.best_feat([X[i] for i in idx], y)
+            feature_set = self.best_feat(X, y, idx)
             if feature_set is None:
                 continue
             mse, node.feature, avg, node.split, idx = feature_set
